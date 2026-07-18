@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>Commerge</h1>
+  <h1>RadLoc</h1>
   <a href="https://arxiv.org/abs/2607.08115"><img src="https://img.shields.io/badge/arXiv-2607.08115-b31b1b?logo=arxiv&logoColor=white" alt="arXiv" /></a>
   <a href="https://sparolab.github.io/research/radloc/"><img src="https://img.shields.io/badge/Project-RadLoc-6f42c1" alt="RadLoc" /></a>
   <a href="https://www.youtube.com/watch?v=q8iaEpMSANU"><img src="https://img.shields.io/badge/YouTube-Video-FF0000?logo=youtube&logoColor=white" alt="YouTube" /></a>

@@ -6,7 +6,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-BSD--3--Clause-green" alt="BSD 3-Clause License" /></a>
   <br />
   <br />
-  <img src="radloc.gif" width="480" alt="RadLoc demo"/>
+  <img src="assets/radloc.gif" width="480" alt="RadLoc demo"/>
 </div>
 
 > [!IMPORTANT]

@@ -68,7 +68,7 @@ services:
     # see docker/README.md.
     user: "${RADLOC_UID:-1000}:${RADLOC_GID:-1000}"
     command: >
-      bash -lc "ros2 run ltslam ltslam_node /radloc/ros2_ws/src/ltslam/config/mulran_kaist.yaml"
+      bash -lc "ros2 run ltslam ltslam_node /radloc/ros2_ws/src/ltslam/config/kaist03_split.yaml"
 
   # Odometry + pose-graph SLAM over one sequence.
   slam:

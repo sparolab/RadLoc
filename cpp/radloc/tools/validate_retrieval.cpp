@@ -12,6 +12,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <map>
 #include <vector>
 
 #include "radloc/retrieval.hpp"
@@ -66,6 +67,25 @@ int main(int argc, char** argv) {
     if (i < split) db.add(d); else queries.push_back(d);
   }
   db.build();
+
+  // The k-d tree adaptor references the coarse key storage, so a database that
+  // is copied or moved must drop and rebuild its index. Sessions live inside a
+  // std::map, which moves them, so this is the real usage, not a corner case.
+  {
+    std::map<int, radloc::PlaceDatabase> moved;
+    moved.emplace(0, db);                       // copy
+    moved.emplace(1, std::move(moved.at(0)));   // move
+    for (size_t q = 0; q < queries.size(); q += 37) {
+      const auto a = db.query(queries[q]);
+      const auto b = moved.at(1).query(queries[q]);
+      if (a.size() != b.size()) { std::cerr << "copy/move changed result count\n"; return 1; }
+      for (size_t i = 0; i < a.size(); ++i)
+        if (a[i].index != b[i].index || std::abs(a[i].distance - b[i].distance) > 1e-12) {
+          std::cerr << "copy/move changed results at query " << q << "\n";
+          return 1;
+        }
+    }
+  }
 
   std::cout << std::fixed << std::setprecision(6);
   for (size_t q = 0; q < queries.size(); ++q) {

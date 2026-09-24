@@ -67,10 +67,45 @@ inline double fineDistance(const std::vector<double>& a, const std::vector<doubl
 }
 
 // A searchable set of places. Descriptors are stored unweighted; the coarse keys
-// are derived once on build().
+// are derived once, when the index is built.
+//
+// The k-d tree adaptor holds a *reference* to the coarse key vector, so the tree
+// cannot travel with a copy or a move of this object - the reference would point
+// at the original's storage. Copy and move therefore drop the index, and query()
+// rebuilds it on demand. Without that, putting a database inside a container
+// that reallocates, or inside a struct that gets moved, is a use-after-move that
+// only shows up as a crash at query time.
 class PlaceDatabase {
  public:
   explicit PlaceDatabase(RetrievalParams params = {}) : params_(params) {}
+
+  PlaceDatabase(const PlaceDatabase& other)
+      : params_(other.params_), descriptors_(other.descriptors_), coarse_(other.coarse_) {}
+  PlaceDatabase(PlaceDatabase&& other) noexcept
+      : params_(other.params_),
+        descriptors_(std::move(other.descriptors_)),
+        coarse_(std::move(other.coarse_)) {
+    other.index_.reset();
+  }
+  PlaceDatabase& operator=(const PlaceDatabase& other) {
+    if (this != &other) {
+      params_ = other.params_;
+      descriptors_ = other.descriptors_;
+      coarse_ = other.coarse_;
+      index_.reset();
+    }
+    return *this;
+  }
+  PlaceDatabase& operator=(PlaceDatabase&& other) noexcept {
+    if (this != &other) {
+      params_ = other.params_;
+      descriptors_ = std::move(other.descriptors_);
+      coarse_ = std::move(other.coarse_);
+      index_.reset();
+      other.index_.reset();
+    }
+    return *this;
+  }
 
   void reserve(std::size_t n) { descriptors_.reserve(n); coarse_.reserve(n); }
 
@@ -89,8 +124,9 @@ class PlaceDatabase {
   std::size_t size() const { return descriptors_.size(); }
   const std::vector<double>& descriptor(int i) const { return descriptors_.at(static_cast<std::size_t>(i)); }
 
-  void build() {
-    if (descriptors_.empty()) { index_.reset(); return; }
+  // Optional: query() builds on demand anyway. Useful to pay the cost up front.
+  void build() const {
+    if (coarse_.empty()) { index_.reset(); return; }
     index_ = std::make_unique<KdTree>(params_.coarse_dims, coarse_, 10 /* leaf size */);
   }
 
@@ -98,7 +134,8 @@ class PlaceDatabase {
   // are eligible when `max_index` >= 0, which is how a single session excludes
   // its own recent neighbours.
   std::vector<Match> query(const Descriptor& q) const {
-    if (!index_) throw std::runtime_error("radloc: call build() before query()");
+    if (descriptors_.empty()) return {};
+    if (!index_) build();
     const std::vector<double> key =
         q.rangeWeighted(static_cast<std::size_t>(params_.coarse_dims));
 
@@ -129,7 +166,7 @@ class PlaceDatabase {
   RetrievalParams params_;
   std::vector<std::vector<double>> descriptors_;  // unweighted, full length
   std::vector<std::vector<double>> coarse_;       // range-weighted, truncated
-  std::unique_ptr<KdTree> index_;
+  mutable std::unique_ptr<KdTree> index_;
 };
 
 }  // namespace radloc

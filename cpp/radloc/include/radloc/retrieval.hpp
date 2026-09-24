@@ -133,14 +133,21 @@ class PlaceDatabase {
   // Nearest places to `query`, best first. Only the first `max_index` entries
   // are eligible when `max_index` >= 0, which is how a single session excludes
   // its own recent neighbours.
-  std::vector<Match> query(const Descriptor& q) const {
+  // `limit`, when non-negative, caps how many leading entries may be matched.
+  // The caller usually knows better than the database how much of the recent
+  // past to exclude - how far the vehicle has travelled, say.
+  std::vector<Match> query(const Descriptor& q, int limit = -1) const {
     if (descriptors_.empty()) return {};
+    if (limit == 0) return {};
     if (!index_) build();
     const std::vector<double> key =
         q.rangeWeighted(static_cast<std::size_t>(params_.coarse_dims));
 
+    const std::size_t searchable =
+        (limit > 0) ? std::min<std::size_t>(static_cast<std::size_t>(limit), descriptors_.size())
+                    : descriptors_.size();
     const std::size_t k =
-        std::min<std::size_t>(static_cast<std::size_t>(std::max(params_.top_k, 1)), descriptors_.size());
+        std::min<std::size_t>(static_cast<std::size_t>(std::max(params_.top_k, 1)), searchable);
     std::vector<std::size_t> ids(k);
     std::vector<double> sq_dists(k);
     nanoflann::KNNResultSet<double> results(k);
@@ -150,8 +157,9 @@ class PlaceDatabase {
     std::vector<Match> matches;
     matches.reserve(results.size());
     for (std::size_t i = 0; i < results.size(); ++i) {
-      const int idx = static_cast<int>(ids[i]);
-      matches.push_back({idx, fineDistance(q.bands, descriptors_[ids[i]], params_)});
+      if (limit > 0 && ids[i] >= static_cast<std::size_t>(limit)) continue;
+      matches.push_back({static_cast<int>(ids[i]),
+                         fineDistance(q.bands, descriptors_[ids[i]], params_)});
     }
     std::sort(matches.begin(), matches.end(),
               [](const Match& a, const Match& b) { return a.distance < b.distance; });

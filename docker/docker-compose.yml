@@ -17,6 +17,8 @@ x-radloc: &radloc
   environment:
     - DISPLAY=${DISPLAY:-}
     - QT_X11_NO_MITSHM=1
+    - HOME=/tmp
+    - ROS_HOME=/tmp/.ros
     - ROS_DOMAIN_ID=0
     - RADLOC_MULRAN=/data/referee/Mulran
   volumes:
@@ -29,6 +31,10 @@ x-radloc: &radloc
     # Datasets, read-only.
     - ${RADLOC_MULRAN_HOST:-/storage/Datasets/ReFeree}:/data/referee:ro
     - ${RADLOC_RADAR_HOST:-/nas2/Radar_Datasets}:/data/radar:ro
+    # Sequences in the layout the reader needs: one row per azimuth, eleven
+    # header bytes then the range bins.
+    - ${RADLOC_DATASETS_HOST:-/storage/Datasets/ReFeree}:/data/datasets:ro
+    - ${RADLOC_OUTPUT_HOST:-../output}:/data/output
     # Sessions and their results: the one place a run may write.
     - ${RADLOC_SESSIONS_HOST:-/storage/Datasets/ReFeree/radloc_sessions}:/data/sessions
     # `docker compose run` starts a fresh container each time, so the workspace
@@ -62,7 +68,14 @@ services:
     # see docker/README.md.
     user: "${RADLOC_UID:-1000}:${RADLOC_GID:-1000}"
     command: >
-      bash -lc "ros2 run ltslam ltslam_node /radloc/ros2_ws/src/ltslam/config/mulran_kaist.yaml"
+      bash -lc "ros2 run ltslam ltslam_node /radloc/ros2_ws/src/ltslam/config/kaist03_split.yaml"
+
+  # Odometry + pose-graph SLAM over one sequence.
+  slam:
+    <<: *radloc
+    container_name: radloc_slam_run
+    user: "${RADLOC_UID:-1000}:${RADLOC_GID:-1000}"
+    command: bash -lc "ros2 launch radloc_slam radloc_slam.launch.py sequence_dir:=${SEQUENCE_DIR:-/data/datasets/Mulran/KAIST_03} save_directory:=${SAVE_DIR:-/data/output/KAIST_03/} > ${SAVE_DIR:-/data/output/KAIST_03/}run.log 2>&1"
 
   # Build the ROS 2 workspace (odometry + LT-SLAM), once it is populated.
   build:

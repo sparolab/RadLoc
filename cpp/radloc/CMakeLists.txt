@@ -18,6 +18,7 @@ target_link_libraries(radloc INTERFACE ${OpenCV_LIBS})
 target_include_directories(radloc INTERFACE ${OpenCV_INCLUDE_DIRS})
 
 option(RADLOC_BUILD_TOOLS "Build validation/CLI tools" ON)
+# Consumers that add_subdirectory() this project typically want the library only.
 if(RADLOC_BUILD_TOOLS)
   add_executable(validate_descriptor tools/validate_descriptor.cpp)
   target_link_libraries(validate_descriptor PRIVATE radloc)
@@ -33,4 +34,9 @@ endif()
 if(RADLOC_BUILD_TOOLS)
   add_executable(test_phase_corr tools/test_phase_corr.cpp)
   target_link_libraries(test_phase_corr PRIVATE radloc)
+endif()
+
+if(RADLOC_BUILD_TOOLS)
+  add_executable(make_session tools/make_session.cpp)
+  target_link_libraries(make_session PRIVATE radloc)
 endif()

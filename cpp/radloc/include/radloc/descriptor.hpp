@@ -19,6 +19,7 @@
 
 #include <cmath>
 #include <cstddef>
+#include <fstream>
 #include <stdexcept>
 #include <vector>
 
@@ -155,6 +156,25 @@ inline std::vector<double> fromInverted(const std::vector<double>& inverted) {
   for (std::size_t b = 0; b < inverted.size(); ++b)
     out[b] = 255.0 * static_cast<double>(b + 1) - inverted[b];
   return out;
+}
+
+// Plain-text serialisation, whitespace separated on one line.
+inline void writeRadLocDescriptorText(const std::string& path, const Descriptor& d) {
+  std::ofstream file(path);
+  if (!file) throw std::runtime_error("radloc: cannot write " + path);
+  file.precision(9);
+  for (std::size_t i = 0; i < d.bands.size(); ++i)
+    file << d.bands[i] << (i + 1 == d.bands.size() ? '\n' : ' ');
+}
+
+inline Descriptor readRadLocDescriptorText(const std::string& path) {
+  std::ifstream file(path);
+  if (!file) throw std::runtime_error("radloc: cannot open " + path);
+  Descriptor d;
+  double v;
+  while (file >> v) d.bands.push_back(v);
+  if (d.empty()) throw std::runtime_error("radloc: empty descriptor " + path);
+  return d;
 }
 
 inline Descriptor computeDescriptor(const std::string& image_path,

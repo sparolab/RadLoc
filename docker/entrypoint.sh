@@ -20,10 +20,14 @@ radloc-build() {
     echo "no /radloc/ros2_ws/src - nothing to build" >&2
     return 0
   fi
-  cd /radloc/ros2_ws
-  colcon build --symlink-install \
-    --build-base "$RADLOC_ROS_BUILD" --install-base "$RADLOC_ROS_INSTALL" \
-    --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
+  # colcon writes its log next to the working directory, and every path it is
+  # given must be outside the read-only source mount.
+  cd /opt/radloc
+  colcon --log-base "$RADLOC_ROS_LOG" build --symlink-install \
+    --base-paths /radloc/ros2_ws/src \
+    --build-base "$RADLOC_ROS_BUILD" \
+    --install-base "$RADLOC_ROS_INSTALL" \
+    --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DRADLOC_BUILD_TOOLS=OFF
   source "$RADLOC_ROS_INSTALL/setup.bash"
 }
 

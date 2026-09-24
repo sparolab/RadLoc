@@ -42,7 +42,8 @@ WORKDIR /radloc
 ENV RADLOC_ROOT=/radloc \
     RADLOC_CORE_BUILD=/opt/radloc/core-build \
     RADLOC_ROS_BUILD=/opt/radloc/ros-build \
-    RADLOC_ROS_INSTALL=/opt/radloc/ros-install
+    RADLOC_ROS_INSTALL=/opt/radloc/ros-install \
+    RADLOC_ROS_LOG=/opt/radloc/ros-log
 
 # The C++ core is self-contained, so it builds before anything ROS-shaped and
 # its validation tools are available even when the workspace is empty.

@@ -64,6 +64,7 @@ class KeyframeStore {
   Pose6D optimisedPose(int i) const { std::lock_guard<std::mutex> l(mutex_); return optimised_poses_.at(i); }
   Cloud::Ptr cloud(int i) const { std::lock_guard<std::mutex> l(mutex_); return clouds_.at(i); }
   double stamp(int i) const { std::lock_guard<std::mutex> l(mutex_); return stamps_.at(i); }
+  radloc::Descriptor descriptor(int i) const { std::lock_guard<std::mutex> l(mutex_); return descriptors_.at(i); }
   std::vector<Pose6D> poses() const { std::lock_guard<std::mutex> l(mutex_); return poses_; }
   std::vector<Pose6D> optimisedPoses() const { std::lock_guard<std::mutex> l(mutex_); return optimised_poses_; }
 

@@ -6,8 +6,9 @@
 // registration in another (loop_registration), the file writing in a third
 // (graph_io), and the node keeps only the graph.
 //
-// The g2o it writes is the same file a multi-session optimiser reads back as
-// one session, so the two ends of the pipeline meet without a converter.
+// What it writes is a session: the pose graph, the descriptors and the scans,
+// in the layout the multi-session optimiser reads back. The two ends of the
+// pipeline meet without a converter.
 
 #include <atomic>
 #include <chrono>
@@ -16,6 +17,8 @@
 #include <iomanip>
 #include <memory>
 #include <mutex>
+#include <filesystem>
+#include <sstream>
 #include <string>
 #include <thread>
 #include <vector>
@@ -27,6 +30,7 @@
 
 #include <nav_msgs/msg/odometry.hpp>
 #include <nav_msgs/msg/path.hpp>
+#include <pcl/io/pcd_io.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
@@ -287,11 +291,36 @@ class PoseGraphNode : public rclcpp::Node {
     for (std::size_t i = 0; i < store_.size(); ++i) out << store_.stamp(static_cast<int>(i)) << "\n";
   }
 
+  // Descriptors and scans, named "<index>,<epoch ns>" as Session expects.
+  // Written incrementally: a keyframe never changes once added, and rewriting
+  // every scan on each periodic save would cost more than the run.
+  void saveNewKeyframes() {
+    namespace fs = std::filesystem;
+    const std::string desc_dir = save_directory_ + "RadLocDescriptors/";
+    const std::string scan_dir = save_directory_ + "Scans/";
+    fs::create_directories(desc_dir);
+    fs::create_directories(scan_dir);
+
+    const int count = static_cast<int>(store_.size());
+    for (int i = saved_keyframes_; i < count; ++i) {
+      std::ostringstream name;
+      name << i << "," << static_cast<std::int64_t>(store_.stamp(i) * 1e9);
+
+      radloc::writeRadLocDescriptorText(desc_dir + name.str() + ".rld",
+                                        store_.descriptor(i));
+      const Cloud::Ptr cloud = store_.cloud(i);
+      if (cloud && !cloud->empty())
+        pcl::io::savePCDFileBinary(scan_dir + name.str() + ".pcd", *cloud);
+    }
+    saved_keyframes_ = count;
+  }
+
   void save() {
     if (store_.size() == 0) return;
     std::lock_guard<std::mutex> lock(graph_mutex_);
     try {
       savePoseGraphG2o(save_directory_ + "singlesession_posegraph.g2o", store_.poses(), edges_);
+      saveNewKeyframes();
       saveVerticesKitti(save_directory_ + "odom_poses_kitti.txt", store_.poses());
       saveKeyframeTimes(save_directory_ + "keyframe_times.txt");
       if (!estimate_.empty())
@@ -329,6 +358,7 @@ class PoseGraphNode : public rclcpp::Node {
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
 
   std::atomic<bool> running_{true};
+  int saved_keyframes_ = 0;
   std::atomic<bool> graph_dirty_{false};
   std::thread graph_worker_, loop_worker_, optimise_worker_;
 };

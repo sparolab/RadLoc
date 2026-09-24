@@ -1,0 +1,17 @@
+ltslam:
+
+  sessions_dir: "/root/sessions/"        # end with /  (contains 01/ and 02/)
+
+  central_sess_name: "01"                # reference session (robot_1)
+  query_sess_name: "02"                  # query session (robot_2)
+
+  save_directory: "/root/sessions/LT_result/"   # end with /
+
+  is_display_debug_msgs: false
+
+  loopFitnessScoreThreshold: 0.7         # ICP rejection (lower = stricter)
+
+  kNumSCLoopsUpperBound: 1000            # use all detected SC inter-session loops
+  kNumRSLoopsUpperBound: 0               # RS loops off
+
+  numberOfCores: 16

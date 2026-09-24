@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<package format="3">
+  <name>ltslam</name>
+  <version>0.1.0</version>
+  <description>Standalone (de-ROS'd) LT-SLAM: multi-session radar pose-graph alignment
+    (anchor-node optimization + inter-session Scan Context loops). File-based in/out.</description>
+  <maintainer email="miraiclaude0509@gmail.com">hogyun2</maintainer>
+  <license>BSD-3-Clause</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <!-- system deps (GTSAM, PCL, OpenCV, Eigen, OpenMP) resolved by the Dockerfile -->
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

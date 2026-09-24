@@ -1,0 +1,17 @@
+ltslam:
+
+  sessions_dir: "/data/sessions/"        # end with /
+
+  central_sess_name: "KAIST_01"          # reference session
+  query_sess_name: "KAIST_03"            # query session
+
+  save_directory: "/data/sessions/LT_result/"   # end with /
+
+  is_display_debug_msgs: false
+
+  loopFitnessScoreThreshold: 0.7         # registration rejection (lower = stricter)
+
+  kNumSCLoopsUpperBound: 1000            # use all detected inter-session loops
+  kNumRSLoopsUpperBound: 0               # RS loops off
+
+  numberOfCores: 16

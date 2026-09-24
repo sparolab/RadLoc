@@ -1,0 +1,54 @@
+# RadLoc container.
+#
+#   docker compose -f docker/docker-compose.yml build
+#   docker compose -f docker/docker-compose.yml run --rm validate
+#   docker compose -f docker/docker-compose.yml run --rm radloc      # shell
+#
+# Datasets are mounted read-only. Override the host paths with RADLOC_MULRAN_HOST
+# and RADLOC_RADAR_HOST if they live elsewhere.
+
+x-radloc: &radloc
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile
+  image: radloc:humble
+  network_mode: host
+  ipc: host
+  environment:
+    - DISPLAY=${DISPLAY:-}
+    - QT_X11_NO_MITSHM=1
+    - ROS_DOMAIN_ID=0
+    - RADLOC_MULRAN=/data/referee/Mulran
+  volumes:
+    - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    # Sources are mounted so host edits need no image rebuild. Read-only:
+    # build trees live under /opt/radloc, so a run leaves the host repo clean.
+    - ../cpp:/radloc/cpp:ro
+    - ../docker:/radloc/docker:ro
+    - ../ros2_ws:/radloc/ros2_ws:ro
+    # Datasets, read-only.
+    - ${RADLOC_MULRAN_HOST:-/storage/Datasets/ReFeree}:/data/referee:ro
+    - ${RADLOC_RADAR_HOST:-/nas2/Radar_Datasets}:/data/radar:ro
+  working_dir: /radloc
+
+services:
+  # Interactive shell. radloc-build-core / radloc-build / radloc-validate are
+  # defined by the entrypoint.
+  radloc:
+    <<: *radloc
+    container_name: radloc
+    stdin_open: true
+    tty: true
+    command: bash
+
+  # Rebuild the mounted C++ core, then run every check.
+  validate:
+    <<: *radloc
+    container_name: radloc_validate
+    command: bash -lc "radloc-build-core && radloc-validate"
+
+  # Build the ROS 2 workspace (odometry + LT-SLAM), once it is populated.
+  build:
+    <<: *radloc
+    container_name: radloc_build
+    command: bash -lc "radloc-build-core && radloc-build"

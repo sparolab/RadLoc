@@ -15,7 +15,7 @@
   <br />
   <a href="https://pypi.org/project/radloc/"><img src="https://readme-typing-svg.demolab.com?background=0D1117&color=22C55E&font=Fira+Code&size=14&duration=2500&pause=800&center=true&vCenter=true&width=200&height=24&lines=%24+pip+install+radloc" alt="pip install radloc" /></a>
   <br />
-  <img src="assets/radloc.gif" alt="RadLoc demo" width="95%" />
+  <img src="https://raw.githubusercontent.com/sparolab/RadLoc/main/assets/radloc_slam.gif" alt="RadLoc SLAM on MulRan KAIST_03 (6.25 km): each radar scan becomes a 40-band RadLoc descriptor; revisits are found and registered by phase correlation, the drifting radar odometry is pulled back onto the roads, and the radar map of the campus comes together" width="95%" />
   <p>
     <strong>[IROS 2026] RadLoc: Radar-based 3-DoF Global Localization via Fast, Robust,<br />
     and Lightweight Spatial Descriptor Across Diverse Environmental Scenarios</strong>
@@ -47,6 +47,8 @@ applications/
   multi-robot-slam/           Commerge: merge two robots' maps by exchanging a few keyframes
 docker/                       ROS 1 and ROS 2 images
 ```
+
+<p align="center"><img src="assets/radloc.gif" alt="RadLoc global localization demo" width="70%" /></p>
 
 ______________________________________________________________________
 

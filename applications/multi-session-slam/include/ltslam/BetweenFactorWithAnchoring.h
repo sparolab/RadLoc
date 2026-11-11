@@ -1,4 +1,5 @@
 #pragma once
+// From LT-mapper (https://github.com/gisbi-kim/lt-mapper), MIT License, Copyright (c) Giseop Kim.
 
 #include <gtsam/geometry/Rot2.h>
 #include <gtsam/geometry/Pose2.h>

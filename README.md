@@ -204,7 +204,7 @@ Issues and pull requests are welcome.
 
 ## Acknowledgements
 
-The radar odometry is [Yeti](https://github.com/keenan-burnett/yeti_radar_odometry) by Keenan Burnett, with the feature detector of Sarah H. Cen and Paul Newman. RadLoc builds on [ReFeree](https://github.com/sparolab/ReFeree). The multi-session SLAM follows [LT-mapper](https://github.com/gisbi-kim/lt-mapper) (Giseop Kim and Ayoung Kim, ICRA 2022), whose `BetweenFactorWithAnchoring` it uses. Related: [SOLiD](https://github.com/sparolab/SOLiD), [Commerge](https://github.com/sparolab/Commerge), [SKiD-SLAM](https://github.com/sparolab/SKiD-SLAM).
+The radar odometry is [Yeti](https://github.com/keenan-burnett/yeti_radar_odometry) by Keenan Burnett, with the feature detector of Sarah H. Cen and Paul Newman. RadLoc builds on [ReFeree](https://github.com/sparolab/ReFeree). The multi-session SLAM follows [LT-mapper](https://github.com/gisbi-kim/lt-mapper) (Giseop Kim and Ayoung Kim, ICRA 2022), whose `BetweenFactorWithAnchoring` (MIT License) it uses. Related: [SOLiD](https://github.com/sparolab/SOLiD), [Commerge](https://github.com/sparolab/Commerge), [SKiD-SLAM](https://github.com/sparolab/SKiD-SLAM).
 
 ## License
 

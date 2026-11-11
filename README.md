@@ -152,18 +152,6 @@ The agent follows [`AGENTS.md`](AGENTS.md): it builds the Docker image, converts
 
 ______________________________________________________________________
 
-## :gear: Design notes
-
-**The descriptor is unweighted.** Range weighting — counting distant bands for more — is applied once, when the coarse search key is built. It belongs to how two places are compared, not to the place itself.
-
-**Search is two-stage.** A k-d tree over the leading range-weighted bands proposes candidates; the shortlist is re-ranked on the full unweighted descriptor, where the shared offset cancels.
-
-**Rotation is disambiguated.** The FFT magnitude is centrally symmetric, so the log-polar stage recovers rotation only modulo 180°. Both candidates are de-rotated and the stronger translation peak wins; without this, five rotations in eight beyond ±90° come back flipped by π.
-
-More: [cpp/README.md](cpp/README.md), [python/README.md](python/README.md).
-
-______________________________________________________________________
-
 ## Citation
 
 If you use RadLoc in your research, please cite our [paper](https://arxiv.org/abs/2607.08115).

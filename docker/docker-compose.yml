@@ -10,7 +10,7 @@
 x-radloc: &radloc
   build:
     context: ..
-    dockerfile: docker/Dockerfile
+    dockerfile: docker/Dockerfile.ros2
   image: radloc:humble
   network_mode: host
   ipc: host
@@ -27,7 +27,7 @@ x-radloc: &radloc
     # build trees live under /opt/radloc, so a run leaves the host repo clean.
     - ../cpp:/radloc/cpp:ro
     - ../docker:/radloc/docker:ro
-    - ../ros2_ws:/radloc/ros2_ws:ro
+    - ../applications:/radloc/applications:ro
     # Datasets, read-only.
     - ${RADLOC_MULRAN_HOST:-/storage/Datasets/ReFeree}:/data/referee:ro
     - ${RADLOC_RADAR_HOST:-/nas2/Radar_Datasets}:/data/radar:ro
@@ -61,14 +61,14 @@ services:
 
   # Multi-session alignment over two prepared sessions. Runs as the invoking
   # user so results do not come back root-owned.
-  ltslam:
+  multi_session:
     <<: *radloc
-    container_name: radloc_ltslam
+    container_name: radloc_multi_session
     # UID/GID are readonly in bash, so they are passed under their own names;
     # see docker/README.md.
     user: "${RADLOC_UID:-1000}:${RADLOC_GID:-1000}"
     command: >
-      bash -lc "ros2 run ltslam ltslam_node /radloc/ros2_ws/src/ltslam/config/kaist03_split.yaml"
+      bash -lc "ros2 run radloc_multi_session multi_session_node /radloc/applications/multi-session-slam/config/kaist03_split.yaml"
 
   # Odometry + pose-graph SLAM over one sequence.
   slam:
@@ -77,11 +77,24 @@ services:
     user: "${RADLOC_UID:-1000}:${RADLOC_GID:-1000}"
     command: bash -lc "ros2 launch radloc_slam radloc_slam.launch.py sequence_dir:=${SEQUENCE_DIR:-/data/datasets/Mulran/KAIST_03} save_directory:=${SAVE_DIR:-/data/output/KAIST_03/} > ${SAVE_DIR:-/data/output/KAIST_03/}run.log 2>&1"
 
-  # Build the ROS 2 workspace (odometry + LT-SLAM), once it is populated.
+  # Rebuild the ROS 2 packages (odometry, SLAM, multi-session) against the mounted sources.
   build:
     <<: *radloc
     container_name: radloc_build
     command: bash -lc "radloc-build-core && radloc-build"
+
+  # The same SLAM on ROS 1 Noetic (self-contained image, sources baked in).
+  slam_ros1:
+    image: radloc:noetic
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ros1
+    container_name: radloc_slam_ros1
+    network_mode: host
+    volumes:
+      - ${RADLOC_DATASETS_HOST:-/storage/Datasets/ReFeree}:/data/datasets:ro
+      - ${RADLOC_OUTPUT_HOST:-../output}:/data/output
+    command: bash -c "roslaunch radloc_ros radloc_slam.launch sequence_dir:=${SEQUENCE_DIR:-/data/datasets/Mulran/KAIST_03} save_directory:=${SAVE_DIR:-/data/output/KAIST_03_ros1/}"
 
 volumes:
   radloc-ros-build:

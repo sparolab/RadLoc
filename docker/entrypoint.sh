@@ -10,24 +10,21 @@ fi
 
 # Rebuild the C++ core against the mounted sources.
 radloc-build-core() {
-  cmake -S /radloc/cpp/radloc -B "$RADLOC_CORE_BUILD" -DCMAKE_BUILD_TYPE=Release
-  cmake --build "$RADLOC_CORE_BUILD" -j"$(nproc)"
+  cmake -S /radloc/cpp -B "$RADLOC_CORE_BUILD" -DCMAKE_BUILD_TYPE=Release
+  cmake --build "$RADLOC_CORE_BUILD" -j"$(( $(nproc) < 8 ? $(nproc) : 8 ))"
 }
 
-# Build the ROS 2 workspace, if one is mounted.
+# Build the ROS 2 packages (applications/slam/ros2) and the multi-session tool.
 radloc-build() {
-  if [ ! -d /radloc/ros2_ws/src ]; then
-    echo "no /radloc/ros2_ws/src - nothing to build" >&2
-    return 0
-  fi
   # colcon writes its log next to the working directory, and every path it is
   # given must be outside the read-only source mount.
-  cd /opt/radloc
+  mkdir -p /opt/radloc && cd /opt/radloc
   colcon --log-base "$RADLOC_ROS_LOG" build --symlink-install \
-    --base-paths /radloc/ros2_ws/src \
+    --base-paths /radloc/applications/slam/ros2 /radloc/applications/multi-session-slam \
+    --parallel-workers 4 \
     --build-base "$RADLOC_ROS_BUILD" \
     --install-base "$RADLOC_ROS_INSTALL" \
-    --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo -DRADLOC_BUILD_TOOLS=OFF
+    --cmake-args -DCMAKE_BUILD_TYPE=Release -DRADLOC_BUILD_TOOLS=OFF
   source "$RADLOC_ROS_INSTALL/setup.bash"
 }
 

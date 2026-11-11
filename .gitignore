@@ -1,6 +1,9 @@
 build/
 __pycache__/
 *.pyc
+*.egg-info/
+dist/
 .vscode/
 .pytest_cache/
 output/
+/runs/

@@ -6,7 +6,7 @@ cleaned up: its value is that it is exactly what produced the archived results,
 including huber_loss(), which overwrites the delta it is passed and tests
 abs_diff <= 0, making it a mean absolute difference.
 
-Emits the same lines as cpp/radloc/tools/validate_retrieval, so the C++, the
+Emits the same lines as cpp/tools/validate_retrieval, so the C++, the
 package and this can all be diffed against one another.
 """
 import sys

@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use RadLoc, please cite the paper below."
+title: "RadLoc: radar global descriptor, place recognition and SLAM"
+type: software
+version: 2.0.0
+date-released: 2026-11-11
+repository-code: "https://github.com/sparolab/RadLoc"
+url: "https://sparolab.github.io/research/radloc/"
+license: BSD-3-Clause
+keywords: [radar, place-recognition, global-localization, loop-closure, slam, multi-session, phase-correlation]
+authors: &authors
+  - family-names: Kim
+    given-names: Hogyun
+  - family-names: Choi
+    given-names: Jiwon
+  - family-names: Lee
+    given-names: Jungwoo
+  - family-names: Cho
+    given-names: Younggun
+preferred-citation:
+  type: conference-paper
+  title: "RadLoc: Radar-based 3-DoF Global Localization via Fast, Robust, and Lightweight Spatial Descriptor Across Diverse Environmental Scenarios"
+  authors: *authors
+  collection-title: "2026 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)"
+  year: 2026
+  url: "https://arxiv.org/abs/2607.08115"

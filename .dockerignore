@@ -5,3 +5,7 @@
 __pycache__/
 *.pyc
 assets/
+output/
+.vscode/
+**/*.egg-info/
+**/.pytest_cache/

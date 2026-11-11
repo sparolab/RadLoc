@@ -85,17 +85,26 @@ class PlaceDatabase:
     def descriptor(self, index: int) -> np.ndarray:
         return self._descriptors[index]
 
-    def query(self, bands: np.ndarray) -> list[tuple[int, float]]:
-        """Nearest places as ``(index, fine distance)``, best first."""
+    def query(self, bands: np.ndarray, limit: int = -1) -> list[tuple[int, float]]:
+        """Nearest places as ``(index, fine distance)``, best first.
+
+        ``limit`` >= 0 restricts the search to the first ``limit`` places (how a single session
+        excludes its own recent past), as ``PlaceDatabase::query`` in the C++ core.
+        """
         if self._tree is None:
-            raise RuntimeError("call build() before query()")
+            self.build()
+        if self._tree is None or limit == 0:
+            return []
         bands = np.asarray(bands, dtype=np.float64).ravel()
 
-        k = min(max(self.params.top_k, 1), len(self._descriptors))
+        searchable = len(self._descriptors) if limit < 0 else min(limit, len(self._descriptors))
+        k = min(max(self.params.top_k, 1), searchable)
         _, candidates = self._tree.query(
             range_weighted(bands, self.params.coarse_dims), k=k
         )
         candidates = np.atleast_1d(candidates)
+        if limit >= 0:
+            candidates = candidates[candidates < limit]
 
         scored = [
             (int(c), fine_distance(bands, self._descriptors[c], self.params))

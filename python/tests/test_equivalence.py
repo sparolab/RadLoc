@@ -82,9 +82,9 @@ def test_retrieval_matches_legacy(name):
 @pytest.mark.parametrize("name", SEQUENCES)
 def test_matches_cpp_core(name):
     """The package and the C++ core produce the same descriptor."""
-    binary = Path(__file__).resolve().parents[2] / "cpp/radloc/build/validate_descriptor"
+    binary = Path(__file__).resolve().parents[2] / "cpp/build/validate_descriptor"
     if not binary.exists():
-        pytest.skip("C++ core not built; see cpp/radloc/README.md")
+        pytest.skip("C++ core not built; see cpp/README.md")
     polar, npy = sequence_paths(name)
     result = subprocess.run(
         [str(binary), str(Path(polar[0]).parent), str(Path(npy[0]).parent), "10"],

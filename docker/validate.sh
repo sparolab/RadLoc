@@ -4,7 +4,7 @@
 #   validate.sh [sequence ...]     default: KAIST_03 Riverside_03
 set -uo pipefail
 
-CORE=${RADLOC_ROOT:-/radloc}/cpp/radloc
+CORE=${RADLOC_ROOT:-/radloc}/cpp
 BIN=${RADLOC_CORE_BUILD:-/opt/radloc/core-build}
 MULRAN=${RADLOC_MULRAN:-/data/referee/Mulran}
 SEQS=("${@:-}")

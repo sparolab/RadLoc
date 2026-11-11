@@ -1,18 +1,18 @@
 # radloc (Python reference)
 
 The research implementation. It mirrors the header-only C++ core under
-`cpp/radloc` module for module, and the two are checked against each other and
-against the archived descriptors by `tests/`. The C++ side is what the ROS 2
-nodes use; this side is for reproducing the paper and for trying things out.
+`cpp/` module for module, and the two are checked against each other and
+against the archived descriptors by `tests/`. The C++ side is what the ROS 1 /
+ROS 2 nodes use; this side is for reproducing the paper and for trying things out.
 
 ```
 radloc/
   polar_image.py   polar image loading, layout normalisation, point extraction
   descriptor.py    CA-CFAR azimuth rejection + per-range-band descriptor
   retrieval.py     two-stage place search (coarse k-d tree -> fine re-rank)
-scripts/
-  describe_sequence.py   write descriptors for a sequence
+  cli.py           the `radloc` command: describe a sequence, find its loops
 tests/
+  test_radloc.py         data-free checks, and the package vs the C++ core
   legacy_reference.py    the original implementation, kept verbatim as a fixture
   test_equivalence.py    package vs archive, package vs original, package vs C++
 ```
@@ -20,7 +20,7 @@ tests/
 ## Install
 
 ```bash
-pip install -e .[test]
+pip install radloc          # or, from the repository root: pip install -e ".[test]"
 ```
 
 ## Use

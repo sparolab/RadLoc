@@ -37,7 +37,7 @@ Inside, the entrypoint defines:
 | command | what it does |
 | --- | --- |
 | `radloc-build-core` | rebuild the header-only C++ core and its tools |
-| `radloc-build` | `colcon build` the ROS 2 workspace |
+| `radloc-build` | `colcon build` the ROS 2 packages and the multi-session tool |
 | `radloc-validate [seq ...]` | run the checks, default `KAIST_03 Riverside_03` |
 
 ## Mounts
@@ -47,7 +47,7 @@ image. Datasets are mounted read-only.
 
 | host | container | |
 | --- | --- | --- |
-| `cpp/`, `docker/`, `ros2_ws/` | `/radloc/...` | read-write |
+| `cpp/`, `docker/`, `applications/` | `/radloc/...` | read-only |
 | `/storage/Datasets/ReFeree` | `/data/referee` | read-only |
 | `/nas2/Radar_Datasets` | `/data/radar` | read-only |
 
@@ -62,14 +62,26 @@ RADLOC_MULRAN_HOST=/mnt/referee RADLOC_RADAR_HOST=/mnt/radar \
 from a machine on that network; `/data/radar` is simply absent otherwise, and
 the checks that need it are skipped.
 
-## Building the ROS 2 workspace
+## Building the ROS 2 packages
+
+The image already contains a build; after editing the mounted sources:
 
 ```bash
 docker compose -f docker/docker-compose.yml run --rm build
 ```
 
-`ros2_ws/src` is empty until the odometry and LT-SLAM packages land; the command
-is a no-op until then.
+builds `applications/slam/ros2` (odometry, SLAM) and
+`applications/multi-session-slam` with colcon.
+
+## ROS 1 Noetic
+
+```bash
+docker build -f docker/Dockerfile.ros1 -t radloc:noetic .
+SEQUENCE_DIR=/data/datasets/Mulran/KAIST_03 docker compose -f docker/docker-compose.yml run --rm slam_ros1
+```
+
+The ROS 1 image is self-contained (sources baked in): the core, the
+`radloc_ros` catkin package and `multi_session_node` on the `PATH`.
 
 ## GUI
 

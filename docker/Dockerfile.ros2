@@ -1,0 +1,65 @@
+# RadLoc — ROS 2 Humble (Ubuntu 22.04)
+#
+#   docker build -f docker/Dockerfile.ros2 -t radloc:humble .     (or: docker compose -f docker/docker-compose.yml build)
+#
+# Carries everything the project needs: the header-only C++ core (OpenCV only),
+# the Python reference used to validate it, and the heavier stack the SLAM side
+# wants — GTSAM, PCL, FFTW — so odometry and LT-SLAM build in the same image.
+FROM ros:humble-ros-base-jammy
+
+ENV DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-lc"]
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential cmake git wget \
+        libboost-all-dev libeigen3-dev \
+        libopencv-dev \
+        libfftw3-dev libfftw3-bin \
+        libtbb-dev libomp-dev \
+        python3-pip python3-numpy python3-scipy \
+        python3-colcon-common-extensions \
+        ros-humble-cv-bridge ros-humble-image-transport \
+        ros-humble-pcl-ros ros-humble-pcl-conversions \
+        ros-humble-tf2 ros-humble-tf2-ros ros-humble-tf2-eigen \
+        ros-humble-tf2-geometry-msgs \
+        ros-humble-rviz2 \
+    && rm -rf /var/lib/apt/lists/*
+
+# GTSAM 4.2, C++17, system Eigen so it agrees with PCL and the ROS stack.
+RUN git clone --depth 1 --branch 4.2 https://github.com/borglab/gtsam.git /opt/gtsam && \
+    cmake -S /opt/gtsam -B /opt/gtsam/build \
+        -DGTSAM_USE_SYSTEM_EIGEN=ON \
+        -DGTSAM_BUILD_TESTS=OFF \
+        -DGTSAM_BUILD_EXAMPLES_ALWAYS=OFF \
+        -DGTSAM_WITH_TBB=OFF \
+        -DGTSAM_BUILD_WITH_MARCH_NATIVE=OFF \
+        -DCMAKE_BUILD_TYPE=Release && \
+    cmake --build /opt/gtsam/build -j8 --target install && \
+    ldconfig && rm -rf /opt/gtsam/build
+
+WORKDIR /radloc
+
+# Build trees live outside /radloc so they never collide with the bind-mounted
+# sources, and so a container run leaves no root-owned files in the host repo.
+ENV RADLOC_ROOT=/radloc \
+    RADLOC_CORE_BUILD=/opt/radloc/core-build \
+    RADLOC_ROS_BUILD=/opt/radloc/ros-build \
+    RADLOC_ROS_INSTALL=/opt/radloc/ros-install \
+    RADLOC_ROS_LOG=/opt/radloc/ros-log
+
+# The sources are baked in so the image works on its own; docker-compose.yml
+# mounts them over /radloc so host edits take effect without a rebuild.
+COPY cpp /radloc/cpp
+COPY python /radloc/python
+COPY pyproject.toml README.md /radloc/
+COPY applications /radloc/applications
+COPY docker /radloc/docker
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh && pip3 install --no-cache-dir --no-deps /radloc
+
+# The C++ core and its tools first, then the ROS 2 packages (odometry, SLAM)
+# and the multi-session tool, all with colcon.
+RUN /entrypoint.sh bash -lc "radloc-build-core && radloc-build"
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["bash"]

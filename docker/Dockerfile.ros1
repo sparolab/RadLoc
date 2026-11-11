@@ -1,0 +1,48 @@
+# RadLoc — ROS 1 Noetic (Ubuntu 20.04): the same core, odometry, SLAM and multi-session tool as the ROS 2 image.
+#
+#   docker build -f docker/Dockerfile.ros1 -t radloc:noetic .
+#   docker run --rm -v /path/to/Mulran:/data/datasets/Mulran:ro -v $PWD/output:/data/output radloc:noetic \
+#     roslaunch radloc_ros radloc_slam.launch sequence_dir:=/data/datasets/Mulran/KAIST_03 save_directory:=/data/output/KAIST_03/
+FROM ros:noetic-ros-base-focal
+
+ENV DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-c"]
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential cmake git \
+        libboost-all-dev libeigen3-dev libopencv-dev libtbb-dev libomp-dev \
+        python3-pip python3-numpy python3-scipy \
+        ros-noetic-pcl-ros ros-noetic-pcl-conversions \
+        ros-noetic-tf2 ros-noetic-tf2-ros ros-noetic-tf2-geometry-msgs \
+    && rm -rf /var/lib/apt/lists/*
+
+# GTSAM 4.2, system Eigen (same as the ROS 2 image).
+RUN git clone --depth 1 --branch 4.2 https://github.com/borglab/gtsam.git /opt/gtsam && \
+    cmake -S /opt/gtsam -B /opt/gtsam/build \
+        -DGTSAM_USE_SYSTEM_EIGEN=ON -DGTSAM_BUILD_TESTS=OFF -DGTSAM_BUILD_EXAMPLES_ALWAYS=OFF \
+        -DGTSAM_WITH_TBB=OFF -DGTSAM_BUILD_WITH_MARCH_NATIVE=OFF -DCMAKE_BUILD_TYPE=Release && \
+    cmake --build /opt/gtsam/build -j8 --target install && \
+    ldconfig && rm -rf /opt/gtsam
+
+COPY cpp /radloc/cpp
+COPY python /radloc/python
+COPY pyproject.toml README.md /radloc/
+COPY applications /radloc/applications
+
+# C++ core and tools
+RUN cmake -S /radloc/cpp -B /opt/radloc/core-build -DCMAKE_BUILD_TYPE=Release && \
+    cmake --build /opt/radloc/core-build -j8 && pip3 install --no-cache-dir --no-deps /radloc
+# ROS 1 package (odometry + SLAM). RADLOC_ROOT is passed because the workspace links the package in.
+RUN mkdir -p /ws/src && ln -s /radloc/applications/slam/ros1/radloc_ros /ws/src/radloc_ros && \
+    source /opt/ros/noetic/setup.bash && cd /ws && \
+    catkin_make -DCMAKE_BUILD_TYPE=Release -DRADLOC_ROOT=/radloc -j8
+# multi-session tool (ROS-free)
+RUN cmake -S /radloc/applications/multi-session-slam -B /opt/radloc/ms-build -DCMAKE_BUILD_TYPE=Release && \
+    cmake --build /opt/radloc/ms-build -j8 && cp /opt/radloc/ms-build/multi_session_node /usr/local/bin/
+
+RUN printf 'source /opt/ros/noetic/setup.bash\nsource /ws/devel/setup.bash\n' >> /root/.bashrc && \
+    printf '#!/bin/bash\nsource /opt/ros/noetic/setup.bash\nsource /ws/devel/setup.bash\nexec "$@"\n' > /entrypoint.sh && \
+    chmod +x /entrypoint.sh
+WORKDIR /radloc
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["bash"]

@@ -50,3 +50,16 @@ The session written to `save_directory` (`singlesession_posegraph.g2o`, `odom_po
 Build without Docker: put `ros1/radloc_ros` (catkin) or `ros2/*` (colcon) in a workspace, as a symlink or a
 copy, and pass `-DRADLOC_ROOT=<this repository>` if the package no longer sits at
 `applications/slam/ros*/` in it.
+
+## Results
+
+MulRan `KAIST_03` (6.25 km), 3459 keyframes, 1916 loops. Mean position error (ATE) against MulRan's ground truth after a rigid SE(2) alignment, no scale:
+
+| | ATE mean | RMSE | max |
+| --- | --- | --- | --- |
+| odometry | 71.7 m | 80.4 m | 173.7 m |
+| with RadLoc loop closure | **5.4 m** | **6.1 m** | **12.4 m** |
+
+ROS 1 and ROS 2 give the same result (ROS 1: 1918 loops, 5.4 m). On 4 of the 3,460 scan pairs the odometry's feature matches agree on no motion (at most 6 of 80–236 matches); those scans keep the previous motion instead of taking a wrong one.
+
+<p align="center"><img src="../../assets/kaist03_trajectory.png" alt="KAIST_03 trajectory: odometry drifts, RadLoc SLAM stays on the ground truth" width="90%" /></p>

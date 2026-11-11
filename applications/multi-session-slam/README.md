@@ -22,3 +22,14 @@ MulRan `KAIST_03` cut in two halves (1730 and 1731 scans), each run through the 
 each keyframe of the second session to the nearest of the first goes from 29.31 m (p50) to **0.75 m**, and
 77.4 % of them land within 5 m (12.9 % before); against ground truth, with the first session aligned to it
 (SE(2)), the second session's error goes from 405.2 m to **5.7 m** mean (5.6 m median).
+
+## Results
+
+`KAIST_03` cut in two halves (1730 and 1731 scans), each run through the SLAM in its own frame; 896 inter-session loops in about 30 s. The distance from each keyframe of the second session to the nearest keyframe of the first (no ground truth needed), and the second session's error against ground truth once the first is aligned to it (SE(2)):
+
+| | nearest keyframe, p50 | within 5 m | error vs ground truth, mean (median) |
+| --- | --- | --- | --- |
+| before | 29.31 m | 12.9 % | 405.2 m (458.4 m) |
+| after | **0.75 m** | **77.4 %** | **5.7 m (5.6 m)** |
+
+Only part of the second half retraces the first, so not every keyframe has a counterpart to land on.

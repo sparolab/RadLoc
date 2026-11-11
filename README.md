@@ -99,16 +99,7 @@ docker compose -f docker/docker-compose.yml run --rm slam        # SEQUENCE_DIR 
 
 Radar odometry (Yeti: Cen features, ORB matching, motion-distorted RANSAC) gives the motion, the feature cloud and the RadLoc descriptor of every scan; the pose-graph node closes loops with RadLoc, registers them by phase correlation and optimizes with iSAM2. The run is saved as a **session** (`optimized_poses_kitti.txt`, `odom_poses_kitti.txt`, `keyframe_times.txt`, the `.g2o` graph, descriptors and scans).
 
-MulRan `KAIST_03` (6.25 km), 3459 keyframes, 1916 loops. Mean position error (ATE) against MulRan's ground truth after a rigid SE(2) alignment, no scale:
-
-| | ATE mean | RMSE | max |
-| --- | --- | --- | --- |
-| odometry | 71.7 m | 80.4 m | 173.7 m |
-| with RadLoc loop closure | **5.4 m** | **6.1 m** | **12.4 m** |
-
-ROS 1 and ROS 2 give the same result (ROS 1: 1918 loops, 5.4 m). On 4 of the 3,460 scan pairs the odometry's feature matches agree on no motion (at most 6 of 80–236 matches); those scans keep the previous motion instead of taking a wrong one.
-
-<p align="center"><img src="assets/kaist03_trajectory.png" alt="KAIST_03 trajectory: odometry drifts, RadLoc SLAM stays on the ground truth" width="90%" /></p>
+On MulRan `KAIST_03` (6.25 km), RadLoc loops bring the radar odometry from 71.7 m to **5.4 m** mean error, the same on ROS 1 and ROS 2. Results and the trajectory figure: [applications/slam](applications/slam#results).
 
 Without ROS:
 
@@ -131,14 +122,7 @@ ______________________________________________________________________
 
 ### Multi-session SLAM
 
-LT-SLAM style ([LT-mapper](https://github.com/gisbi-kim/lt-mapper)), as in [Sonar Context](https://github.com/sparolab/sonar_context) and [ReFeree](https://github.com/sparolab/ReFeree): each session keeps its own frame and gets an anchor node; inter-session RadLoc loops, registered by phase correlation, connect the sessions through their anchors. `KAIST_03` cut in two halves (1730 and 1731 scans), each run through the SLAM in its own frame; 896 inter-session loops in about 30 s. The distance from each keyframe of the second session to the nearest keyframe of the first (no ground truth needed), and the second session's error against ground truth once the first is aligned to it (SE(2)):
-
-| | nearest keyframe, p50 | within 5 m | error vs ground truth, mean (median) |
-| --- | --- | --- | --- |
-| before | 29.31 m | 12.9 % | 405.2 m (458.4 m) |
-| after | **0.75 m** | **77.4 %** | **5.7 m (5.6 m)** |
-
-Only part of the second half retraces the first, so not every keyframe has a counterpart to land on.
+LT-SLAM style ([LT-mapper](https://github.com/gisbi-kim/lt-mapper)), as in [Sonar Context](https://github.com/sparolab/sonar_context) and [ReFeree](https://github.com/sparolab/ReFeree): each session keeps its own frame and gets an anchor node; inter-session RadLoc loops, registered by phase correlation, connect the sessions through their anchors. `KAIST_03` cut in two halves, each in its own frame: the second half lands within **0.75 m** (median) of the first. Results: [applications/multi-session-slam](applications/multi-session-slam#results).
 
 ```bash
 multi_session_node applications/multi-session-slam/config/kaist03_split.yaml     # sessions_dir/{01,02} -> save_directory

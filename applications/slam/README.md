@@ -22,6 +22,10 @@ keyframe every `keyframe_gap_m` (0: every scan), proposes a loop for each new ke
 `loop_min_travel_m` (10 m) back along the path, registers it by phase correlation (`loop_min_response` 0.3) and
 optimizes with iSAM2. Parameters and topics are the same on both ROS versions.
 
+**Radar resolution.** `dataset:=mulran` (default; 0.0596 m per range bin, also Boreas) or `dataset:=oxford`
+(0.0432 m, Oxford Radar RobotCar) loads `config/<dataset>.yaml` (`radar_resolution`). A wrong value scales the
+whole trajectory: with 0.0432 on MulRan it comes out about 0.73 times too short.
+
 **Input layout.** The odometry reads the Oxford layout: one row per azimuth, 11 metadata bytes (timestamp,
 encoder count, valid flag) and then the range bins. MulRan's downloaded `polar/` scans are range x azimuth
 without that header; convert them once:

@@ -17,7 +17,8 @@ build/ms/multi_session_node applications/multi-session-slam/config/kaist03_split
 result goes to `save_directory` (removed and recreated on each run): the optimized poses of both sessions in the
 central frame and the inter-session loops.
 
-MulRan `KAIST_03` split in two halves, each in its own frame (`config/kaist03_split.yaml`): 997 inter-session
-loops in 18 s; the distance from each keyframe of the second session to the nearest of the first goes from
-50.64 m (p50) to **0.59 m**, and 77.3 % of them land within 5 m (8.9 % before), which matches the overlap of the
-two halves (about 78 %).
+MulRan `KAIST_03` cut in two halves (1730 and 1731 scans), each run through the SLAM in its own frame
+(`dataset:=mulran`), then `config/kaist03_split.yaml`: 896 inter-session loops in 23 s. The distance from each
+keyframe of the second session to the nearest of the first goes from 44.89 m (p50) to **0.94 m**, and 68.8 % of
+them land within 5 m (15.5 % before); against ground truth, with the first session aligned to it (SE(2)), the
+second session's error goes from 398.9 m to **8.0 m** mean (5.6 m median).

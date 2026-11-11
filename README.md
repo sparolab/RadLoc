@@ -106,29 +106,36 @@ ______________________________________________________________________
 
 Radar odometry (Yeti: Cen features, ORB matching, motion-distorted RANSAC with Doppler correction) publishes the motion, the feature cloud and the RadLoc descriptor of every scan; the pose-graph node closes loops with RadLoc, registers them by phase correlation and optimizes with iSAM2. The run is written as a **session** (pose graph, descriptors, scans) that the multi-session tool reads back.
 
-MulRan `KAIST_03`, 3398 keyframes, 1723 loops: odometry alone drifts to 98.3 m against ground truth; with loop closure the error stays near 6 m for the whole 6.2 km.
+MulRan `KAIST_03` (6.25 km), ROS 2, 3459 keyframes, 1910 loops. Mean position error (ATE) against MulRan's ground truth after a rigid SE(2) alignment, no scale:
+
+| | ATE mean | RMSE | max |
+| --- | --- | --- | --- |
+| odometry | 116.4 m | 146.7 m | 424.6 m |
+| with RadLoc loop closure | **4.3 m** | **5.6 m** | 43.3 m |
+
+The ROS 1 node, fed the same odometry, closes 1913 loops and ends at 12.6 m: its graph is the same (solved in one batch, both give 9.3 m), but iSAM2's result depends on the order in which the loops arrive.
 
 <p align="center"><img src="assets/kaist03_trajectory.png" alt="KAIST_03 trajectory: odometry drifts, RadLoc SLAM stays on the ground truth" width="90%" /></p>
 
 ```bash
 # ROS 2 Humble
-ros2 launch radloc_slam radloc_slam.launch.py sequence_dir:=<MulRan>/KAIST_03 save_directory:=/data/output/KAIST_03/
+ros2 launch radloc_slam radloc_slam.launch.py sequence_dir:=<MulRan>/KAIST_03 save_directory:=/data/output/KAIST_03/ dataset:=mulran
 # ROS 1 Noetic
-roslaunch radloc_ros radloc_slam.launch sequence_dir:=<MulRan>/KAIST_03 save_directory:=/data/output/KAIST_03/
+roslaunch radloc_ros radloc_slam.launch sequence_dir:=<MulRan>/KAIST_03 save_directory:=/data/output/KAIST_03/ dataset:=mulran
 ```
 
-Both read `polar/` from the sequence folder in the Oxford layout (MulRan scans: convert once with [`applications/slam/tools/mulran_to_oxford.py`](applications/slam/tools/mulran_to_oxford.py)); the session goes to `save_directory` (`optimized_poses_kitti.txt`, `odom_poses_kitti.txt`, `keyframe_times.txt`, `singlesession_posegraph.g2o`, `RadLocDescriptors/`, `Scans/`). See [applications/slam](applications/slam).
+`dataset` sets the radar's range resolution: `mulran` (0.0596 m per bin, also Boreas, the default) or `oxford` (0.0432 m per bin, Oxford Radar RobotCar); a wrong value scales the whole trajectory. Both read `polar/` from the sequence folder in the Oxford layout (MulRan scans: convert once with [`applications/slam/tools/mulran_to_oxford.py`](applications/slam/tools/mulran_to_oxford.py)); the session goes to `save_directory` (`optimized_poses_kitti.txt`, `odom_poses_kitti.txt`, `keyframe_times.txt`, `singlesession_posegraph.g2o`, `RadLocDescriptors/`, `Scans/`). See [applications/slam](applications/slam).
 
 ## :link: Multi-session SLAM
 
-Two halves of that run, each in its own frame — the second retraces the first over about 78 % of its length. 997 inter-session loops in 18 s. Measured as the distance from each keyframe of the second session to the nearest of the first, which needs no external ground truth:
+`KAIST_03` cut in two halves (1730 and 1731 scans), each run through the SLAM in its own frame; 896 inter-session loops in 23 s. The distance from each keyframe of the second session to the nearest keyframe of the first (no ground truth needed), and the second session's error against ground truth once the first is aligned to it (SE(2)):
 
-| | p50 | within 5 m |
-| --- | --- | --- |
-| before | 50.64 m | 8.9 % |
-| after | **0.59 m** | **77.3 %** |
+| | nearest keyframe, p50 | within 5 m | error vs ground truth, mean (median) |
+| --- | --- | --- | --- |
+| before | 44.89 m | 15.5 % | 398.9 m (446.9 m) |
+| after | **0.94 m** | **68.8 %** | **8.0 m (5.6 m)** |
 
-The ceiling matches the overlap: what has a counterpart is aligned, the rest has nothing to align to.
+Only part of the second half retraces the first, so not every keyframe has a counterpart to land on.
 
 ```bash
 multi_session_node applications/multi-session-slam/config/kaist03_split.yaml     # sessions_dir/{01,02} -> save_directory

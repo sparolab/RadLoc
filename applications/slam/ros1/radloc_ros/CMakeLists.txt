@@ -53,4 +53,4 @@ add_executable(reoptimize ${COMMON}/src/reoptimize.cpp ${COMMON}/src/graph_io.cp
 target_link_libraries(reoptimize gtsam)
 
 install(TARGETS odometry_node pose_graph_node reoptimize RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(DIRECTORY launch config DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

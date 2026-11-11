@@ -85,8 +85,9 @@ class RadarOdometryNode {
     child_frame_id_ = param<std::string>(pnh, "child_frame_id", "radar");
 
     min_range_ = param<int>(pnh, "min_range", 58);
-    // Metres per range bin. Entangled with the encoder convention the azimuths
-    // are read under, so it is left where the published code had it.
+    // Metres per range bin of the radar: 0.0432 for the Oxford Radar RobotCar CTS350-X (the
+    // default, as in the published code), 0.0596 for MulRan's CIR204-H and Boreas. The launch files set it from
+    // config/<dataset>.yaml; a wrong value scales the whole trajectory.
     radar_resolution_ = param<double>(pnh, "radar_resolution", 0.0432);
     cart_resolution_ = param<double>(pnh, "cart_resolution", 0.2592);
     cart_pixel_width_ = param<int>(pnh, "cart_pixel_width", 964);

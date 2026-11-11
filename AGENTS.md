@@ -48,9 +48,9 @@ RADLOC_DATASETS_HOST=<parent of Mulran> RADLOC_OUTPUT_HOST=<OUT> SEQUENCE_DIR=/d
   SAVE_DIR=/data/output/KAIST_03/ docker compose -f docker/docker-compose.yml run --rm slam
 ```
 
-Docker, ROS 1: `docker build -f docker/Dockerfile.ros1 -t radloc:noetic .`, then the `slam_ros1` service with the same variables.
+Docker, ROS 1: `docker build -f docker/Dockerfile.ros1 -t radloc:noetic .`, then the `slam_ros1` service with the same variables. Run one ROS 2 SLAM per Docker network (or give each a different `ROS_DOMAIN_ID`): two ROS 2 containers on the default bridge hear each other's topics and mix their runs.
 
-The odometry replays every scan (100 ms apart by default, `scan_period_ms`); `KAIST_03` (3,462 scans) takes about 6 minutes. Check the log for `loop <i> <- <j>` lines and the session in `SAVE_DIR`: `optimized_poses_kitti.txt`, `odom_poses_kitti.txt`, `keyframe_times.txt`, `singlesession_posegraph.g2o`, `RadLocDescriptors/`, `Scans/`. To score against ground truth, interpolate `global_pose.csv` at `keyframe_times.txt` and align (the README result: odometry drifts to 98.3 m, SLAM stays near 6 m over 6.2 km).
+The odometry replays every scan (100 ms apart by default, `scan_period_ms`); `KAIST_03` (3,461 scans) takes 15–20 minutes. MulRan needs `dataset:=mulran` (the default: 0.0596 m per range bin); Oxford Radar RobotCar `dataset:=oxford`. Check the log for `loop <i> <- <j>` lines and the session in `SAVE_DIR`: `optimized_poses_kitti.txt`, `odom_poses_kitti.txt`, `keyframe_times.txt`, `singlesession_posegraph.g2o`, `RadLocDescriptors/`, `Scans/`. To score against ground truth, interpolate the MulRan ground truth at `keyframe_times.txt` and align with a rigid SE(2) transform (the README result, ROS 2: 3459 keyframes, 1910 loops, ATE 116.4 m for the odometry, 4.3 m with loop closure; the ROS 1 run of the same data gave 12.6 m, iSAM2 being order dependent).
 
 ## 4. Multi-session SLAM (optional)
 

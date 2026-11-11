@@ -52,8 +52,10 @@ ament_target_dependencies(odometry_node
   radloc_interfaces)
 
 install(TARGETS odometry_node DESTINATION lib/${PROJECT_NAME})
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/launch")
-  install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
-endif()
+foreach(dir launch config)
+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
+    install(DIRECTORY ${dir} DESTINATION share/${PROJECT_NAME})
+  endif()
+endforeach()
 
 ament_package()

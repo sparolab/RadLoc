@@ -1,16 +1,20 @@
 <!-- Radar odometry and pose-graph SLAM over a recorded sequence (ROS 1).
-     roslaunch radloc_ros radloc_slam.launch sequence_dir:=/data/datasets/Mulran/KAIST_03 save_directory:=/data/output/KAIST_03/ -->
+     roslaunch radloc_ros radloc_slam.launch sequence_dir:=/data/datasets/Mulran/KAIST_03 save_directory:=/data/output/KAIST_03/ dataset:=mulran -->
 <launch>
   <arg name="sequence_dir" doc="Sequence directory holding polar/" />
   <arg name="save_directory" default="/data/output/" doc="Where the session is written; end with /" />
   <arg name="keyframe_gap_m" default="0.0" />
   <arg name="scan_period_ms" default="100" />
+  <!-- the radar's range resolution: mulran 0.0596 m/bin, oxford 0.0432 m/bin (Oxford Radar RobotCar; Boreas is 0.0596 like MulRan).
+       A wrong value scales the whole trajectory. -->
+  <arg name="dataset" default="mulran" />
 
   <node pkg="radloc_ros" type="pose_graph_node" name="radloc_slam" output="screen" required="false">
     <param name="save_directory" value="$(arg save_directory)" />
     <param name="keyframe_gap_m" value="$(arg keyframe_gap_m)" />
   </node>
   <node pkg="radloc_ros" type="odometry_node" name="radloc_odometry" output="screen">
+    <rosparam command="load" file="$(find radloc_ros)/config/$(arg dataset).yaml" />
     <param name="sequence_dir" value="$(arg sequence_dir)" />
     <param name="scan_period_ms" value="$(arg scan_period_ms)" />
   </node>

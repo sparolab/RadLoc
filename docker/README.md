@@ -83,6 +83,12 @@ SEQUENCE_DIR=/data/datasets/Mulran/KAIST_03 docker compose -f docker/docker-comp
 The ROS 1 image is self-contained (sources baked in): the core, the
 `radloc_ros` catkin package and `multi_session_node` on the `PATH`.
 
+## Datasets and runs
+
+`slam` and `slam_ros1` take `SEQUENCE_DIR`, `SAVE_DIR` and `DATASET` (`mulran`, the default, or `oxford`: the
+radar's range resolution, see `applications/slam/README.md`). The ROS 2 services use `network_mode: host`; when
+several ROS 2 runs go at once, give each its own `ROS_DOMAIN_ID` (or its own network), or their topics mix.
+
 ## GUI
 
 `network_mode: host` and the X11 socket are already wired up, so `rviz2` works

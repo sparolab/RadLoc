@@ -6,7 +6,7 @@
 Oxford layout: one row per azimuth, 11 metadata bytes (int64 timestamp, uint16 encoder count out of 5600,
 uint8 valid = 255) then the range bins. MulRan scans carry no per-azimuth time, so it is spread linearly
 over one revolution (--period, 4 Hz for the CIR204 of MulRan) from the file name's time, in the file name's
-unit (nanoseconds for MulRan).
+unit (nanoseconds for MulRan). The azimuth order is reversed to match the Oxford encoder direction.
 """
 import argparse
 from pathlib import Path
@@ -28,6 +28,9 @@ def main() -> None:
         img = cv2.imread(str(f), cv2.IMREAD_GRAYSCALE)
         if img.shape[0] > img.shape[1]:          # range x azimuth -> azimuth x range
             img = img.T
+        # MulRan's azimuths run the other way round from the Oxford encoder count: without this the
+        # odometry comes out mirrored against MulRan's ground truth.
+        img = img[::-1]
         n_az, n_rng = img.shape
         t0 = int(f.stem)
         out = np.zeros((n_az, 11 + n_rng), np.uint8)

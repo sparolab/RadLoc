@@ -75,7 +75,7 @@ services:
     <<: *radloc
     container_name: radloc_slam_run
     user: "${RADLOC_UID:-1000}:${RADLOC_GID:-1000}"
-    command: bash -lc "ros2 launch radloc_slam radloc_slam.launch.py sequence_dir:=${SEQUENCE_DIR:-/data/datasets/Mulran/KAIST_03} save_directory:=${SAVE_DIR:-/data/output/KAIST_03/} > ${SAVE_DIR:-/data/output/KAIST_03/}run.log 2>&1"
+    command: bash -lc "ros2 launch radloc_slam radloc_slam.launch.py sequence_dir:=${SEQUENCE_DIR:-/data/datasets/Mulran/KAIST_03} save_directory:=${SAVE_DIR:-/data/output/KAIST_03/} dataset:=${DATASET:-mulran} > ${SAVE_DIR:-/data/output/KAIST_03/}run.log 2>&1"
 
   # Rebuild the ROS 2 packages (odometry, SLAM, multi-session) against the mounted sources.
   build:
@@ -94,7 +94,7 @@ services:
     volumes:
       - ${RADLOC_DATASETS_HOST:-/storage/Datasets/ReFeree}:/data/datasets:ro
       - ${RADLOC_OUTPUT_HOST:-../output}:/data/output
-    command: bash -c "roslaunch radloc_ros radloc_slam.launch sequence_dir:=${SEQUENCE_DIR:-/data/datasets/Mulran/KAIST_03} save_directory:=${SAVE_DIR:-/data/output/KAIST_03_ros1/}"
+    command: bash -c "roslaunch radloc_ros radloc_slam.launch sequence_dir:=${SEQUENCE_DIR:-/data/datasets/Mulran/KAIST_03} save_directory:=${SAVE_DIR:-/data/output/KAIST_03_ros1/} dataset:=${DATASET:-mulran}"
 
 volumes:
   radloc-ros-build:

@@ -1,5 +1,9 @@
 <div align="center">
-  <h1>RadLoc</h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo_dark.svg" />
+    <img src="assets/logo_light.svg" alt="RadLoc: Radar-based 3-DoF Global Localization" width="560" />
+  </picture>
+  <br />
   <a href="https://github.com/sparolab/RadLoc/tree/main/cpp"><img src="https://img.shields.io/badge/-C++-blue?logo=cplusplus" /></a>
   <a href="https://github.com/sparolab/RadLoc/tree/main/python"><img src="https://img.shields.io/badge/Python-3670A0?logo=python&logoColor=ffdd54" /></a>
   <a href="https://pypi.org/project/radloc/"><img src="https://img.shields.io/pypi/v/radloc?logo=pypi&logoColor=white&label=PyPI&cacheSeconds=3600" /></a>

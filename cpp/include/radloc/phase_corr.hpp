@@ -97,6 +97,12 @@ inline cv::Mat logPolarSpectrum(const cv::Mat& cart) {
   return log_polar;
 }
 
+// cv::getRotationMatrix2D (not in every OpenCV 5 build): rotation by `deg` about `c`, as a 2x3 affine.
+inline cv::Mat rotationMatrix2D(const cv::Point2f& c, double deg) {
+  const double a = std::cos(deg * CV_PI / 180.0), b = std::sin(deg * CV_PI / 180.0);
+  return (cv::Mat_<double>(2, 3) << a, b, (1 - a) * c.x - b * c.y, -b, a, b * c.x + (1 - a) * c.y);
+}
+
 // Registers two bird's-eye images.
 inline Transform2D estimateTransform(const cv::Mat& target, const cv::Mat& source,
                                      const PhaseCorrParams& p = {}) {
@@ -116,7 +122,7 @@ inline Transform2D estimateTransform(const cv::Mat& target, const cv::Mat& sourc
   const cv::Point2f centre(source.cols / 2.0f, source.rows / 2.0f);
   auto translation_for = [&](double deg, double* response) {
     cv::Mat derotated;
-    cv::warpAffine(source, derotated, cv::getRotationMatrix2D(centre, deg, 1.0),
+    cv::warpAffine(source, derotated, rotationMatrix2D(centre, deg),
                    source.size());
     return cv::phaseCorrelate(target, derotated, cv::noArray(), response);
   };

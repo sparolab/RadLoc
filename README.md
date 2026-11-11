@@ -130,7 +130,7 @@ roslaunch radloc_ros radloc_slam.launch sequence_dir:=<MulRan>/KAIST_03 save_dir
 
 ## :link: Multi-session SLAM
 
-`KAIST_03` cut in two halves (1730 and 1731 scans), each run through the SLAM in its own frame; 896 inter-session loops in about 30 s. The distance from each keyframe of the second session to the nearest keyframe of the first (no ground truth needed), and the second session's error against ground truth once the first is aligned to it (SE(2)):
+LT-SLAM style ([LT-mapper](https://github.com/gisbi-kim/lt-mapper)), as in [Sonar Context](https://github.com/sparolab/sonar_context) and [ReFeree](https://github.com/sparolab/ReFeree): each session keeps its own frame and gets an anchor node, and inter-session RadLoc loops (registered by phase correlation) connect the sessions through their anchors. `KAIST_03` cut in two halves (1730 and 1731 scans), each run through the SLAM in its own frame; 896 inter-session loops in about 30 s. The distance from each keyframe of the second session to the nearest keyframe of the first (no ground truth needed), and the second session's error against ground truth once the first is aligned to it (SE(2)):
 
 | | nearest keyframe, p50 | within 5 m | error vs ground truth, mean (median) |
 | --- | --- | --- | --- |
@@ -204,7 +204,7 @@ Issues and pull requests are welcome.
 
 ## Acknowledgements
 
-The radar odometry is [Yeti](https://github.com/keenan-burnett/yeti_radar_odometry) by Keenan Burnett, with the feature detector of Sarah H. Cen and Paul Newman. RadLoc builds on [ReFeree](https://github.com/sparolab/ReFeree). Related: [SOLiD](https://github.com/sparolab/SOLiD), [Commerge](https://github.com/sparolab/Commerge), [SKiD-SLAM](https://github.com/sparolab/SKiD-SLAM).
+The radar odometry is [Yeti](https://github.com/keenan-burnett/yeti_radar_odometry) by Keenan Burnett, with the feature detector of Sarah H. Cen and Paul Newman. RadLoc builds on [ReFeree](https://github.com/sparolab/ReFeree). The multi-session SLAM follows [LT-mapper](https://github.com/gisbi-kim/lt-mapper) (Giseop Kim and Ayoung Kim, ICRA 2022), whose `BetweenFactorWithAnchoring` it uses. Related: [SOLiD](https://github.com/sparolab/SOLiD), [Commerge](https://github.com/sparolab/Commerge), [SKiD-SLAM](https://github.com/sparolab/SKiD-SLAM).
 
 ## License
 

@@ -9,7 +9,9 @@
 // Both are normalised here to a single in-memory layout: rows = range bins,
 // cols = azimuths.
 
-#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
 #include <cmath>
 #include <stdexcept>
 #include <string>

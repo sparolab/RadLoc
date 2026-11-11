@@ -12,7 +12,8 @@
 // (ltslam/PhaseCorrReg.h). Depends on OpenCV only - no FFTW, no PCL.
 
 #include <cmath>
-#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 #include <vector>
 
 namespace radloc {
@@ -90,9 +91,9 @@ inline cv::Mat logPolarSpectrum(const cv::Mat& cart) {
 
   cv::Mat log_polar;
   const cv::Point2f center(mag.cols / 2.0f, mag.rows / 2.0f);
-  const double scale = mag.cols / std::log(static_cast<double>(mag.rows) / 2.0);
-  cv::logPolar(mag, log_polar, center, scale,
-               cv::INTER_LINEAR + cv::WARP_FILL_OUTLIERS);
+  // cv::logPolar(mag, out, center, cols / log(rows / 2), flags), which OpenCV 5 removed, is this warpPolar call
+  cv::warpPolar(mag, log_polar, mag.size(), center, mag.rows / 2.0,
+                cv::INTER_LINEAR + cv::WARP_FILL_OUTLIERS + cv::WARP_POLAR_LOG);
   return log_polar;
 }
 

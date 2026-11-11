@@ -22,6 +22,13 @@ keyframe every `keyframe_gap_m` (0: every scan), proposes a loop for each new ke
 `loop_min_travel_m` (10 m) back along the path, registers it by phase correlation (`loop_min_response` 0.3) and
 optimizes with iSAM2. Parameters and topics are the same on both ROS versions.
 
+**Odometry failures.** Motion-distorted RANSAC draws 2-match subsets until it is 99.9 % sure to have drawn an
+all-inlier one (`ransac_confidence`, at most `ransac_max_iterations` = 2000; the published code always drew
+100). A scan whose motion is then supported by fewer than `odometry_min_inliers` (10) matches is a failed match,
+not an estimate: it keeps the previous motion (constant velocity) and a warning says so. On KAIST_03 this
+happens on 4 scans, where at most 6 of 80–236 ORB matches agree on any motion; before, the best of 100 random
+draws was taken anyway, and one such scan turned the trajectory by 33 deg and moved it 32 m.
+
 **Radar resolution.** `dataset:=mulran` (default; 0.0596 m per range bin, also Boreas) or `dataset:=oxford`
 (0.0432 m, Oxford Radar RobotCar) loads `config/<dataset>.yaml` (`radar_resolution`). A wrong value scales the
 whole trajectory: with 0.0432 on MulRan it comes out about 0.73 times too short.

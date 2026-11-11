@@ -177,6 +177,10 @@ public:
     void getTransform(double delta_t, Eigen::MatrixXd &Tf);
     void getMotion(Eigen::VectorXd &w) {w = w_best;}
     void setDopplerParameter(double beta_) {beta = beta_;}
+    // Probability that the adaptive RANSAC has drawn at least one all-inlier subset before it stops.
+    void setConfidence(double p) {confidence = p;}
+    // Matches that support the final motion (after computeModel()).
+    int num_inliers() const {return max_inliers;}
 
     /*!
        \brief Computes the ego-motion vector that best aligns the two pointclouds
@@ -201,6 +205,8 @@ private:
     double error_converge = 0.01;
     int dim = 2;
     double beta = -0.049;  // beta = (f_t / (df / dt))
+    double confidence = 0.999;
+    int max_inliers = 0;
     double r_observable_sq = 0.0625;
     bool doppler = false;
     int num_transforms = 21;

@@ -108,14 +108,14 @@ ______________________________________________________________________
 
 Radar odometry (Yeti: Cen features, ORB matching, motion-distorted RANSAC with Doppler correction) publishes the motion, the feature cloud and the RadLoc descriptor of every scan; the pose-graph node closes loops with RadLoc, registers them by phase correlation and optimizes with iSAM2. The run is written as a **session** (pose graph, descriptors, scans) that the multi-session tool reads back.
 
-MulRan `KAIST_03` (6.25 km), ROS 2, 3459 keyframes, 1910 loops. Mean position error (ATE) against MulRan's ground truth after a rigid SE(2) alignment, no scale:
+MulRan `KAIST_03` (6.25 km), 3459 keyframes, 1916 loops. Mean position error (ATE) against MulRan's ground truth after a rigid SE(2) alignment, no scale:
 
 | | ATE mean | RMSE | max |
 | --- | --- | --- | --- |
-| odometry | 116.4 m | 146.7 m | 424.6 m |
-| with RadLoc loop closure | **4.3 m** | **5.6 m** | 43.3 m |
+| odometry | 71.7 m | 80.4 m | 173.7 m |
+| with RadLoc loop closure | **5.4 m** | **6.1 m** | **12.4 m** |
 
-The ROS 1 node, fed the same odometry, closes 1913 loops and ends at 12.6 m: its graph is the same (solved in one batch, both give 9.3 m), but iSAM2's result depends on the order in which the loops arrive.
+ROS 1 and ROS 2 give the same result (ROS 1: 1918 loops, 5.4 m). On 4 of the 3,460 scan pairs the odometry's feature matches agree on no motion (at most 6 of 80–236 matches); those scans keep the previous motion instead of taking a wrong one.
 
 <p align="center"><img src="assets/kaist03_trajectory.png" alt="KAIST_03 trajectory: odometry drifts, RadLoc SLAM stays on the ground truth" width="90%" /></p>
 
@@ -130,12 +130,12 @@ roslaunch radloc_ros radloc_slam.launch sequence_dir:=<MulRan>/KAIST_03 save_dir
 
 ## :link: Multi-session SLAM
 
-`KAIST_03` cut in two halves (1730 and 1731 scans), each run through the SLAM in its own frame; 896 inter-session loops in 23 s. The distance from each keyframe of the second session to the nearest keyframe of the first (no ground truth needed), and the second session's error against ground truth once the first is aligned to it (SE(2)):
+`KAIST_03` cut in two halves (1730 and 1731 scans), each run through the SLAM in its own frame; 896 inter-session loops in about 30 s. The distance from each keyframe of the second session to the nearest keyframe of the first (no ground truth needed), and the second session's error against ground truth once the first is aligned to it (SE(2)):
 
 | | nearest keyframe, p50 | within 5 m | error vs ground truth, mean (median) |
 | --- | --- | --- | --- |
-| before | 44.89 m | 15.5 % | 398.9 m (446.9 m) |
-| after | **0.94 m** | **68.8 %** | **8.0 m (5.6 m)** |
+| before | 29.31 m | 12.9 % | 405.2 m (458.4 m) |
+| after | **0.75 m** | **77.4 %** | **5.7 m (5.6 m)** |
 
 Only part of the second half retraces the first, so not every keyframe has a counterpart to land on.
 

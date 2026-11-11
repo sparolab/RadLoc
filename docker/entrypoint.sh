@@ -24,7 +24,7 @@ radloc-build() {
     --parallel-workers 4 \
     --build-base "$RADLOC_ROS_BUILD" \
     --install-base "$RADLOC_ROS_INSTALL" \
-    --cmake-args -DCMAKE_BUILD_TYPE=Release -DRADLOC_BUILD_TOOLS=OFF
+    --cmake-args -DCMAKE_BUILD_TYPE=Release -DRADLOC_BUILD_TOOLS=OFF || return 1
   source "$RADLOC_ROS_INSTALL/setup.bash"
 }
 

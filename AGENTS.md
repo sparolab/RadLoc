@@ -34,6 +34,12 @@ Check: `ctest` passes, pytest passes (the archive tests skip without `RADLOC_MUL
 
 ## 3. SLAM
 
+The odometry needs the Oxford layout (one row per azimuth with an 11-byte header). If `polar/*.png` are 3360 x 400 (range x azimuth, as downloaded from MulRan), convert them first, outside the dataset folder:
+
+```bash
+python3 applications/slam/tools/mulran_to_oxford.py <SEQ>/polar <DATA>/Mulran/KAIST_03/polar
+```
+
 Docker, ROS 2:
 
 ```bash

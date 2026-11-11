@@ -31,7 +31,8 @@ COPY applications /radloc/applications
 
 # C++ core and tools
 RUN cmake -S /radloc/cpp -B /opt/radloc/core-build -DCMAKE_BUILD_TYPE=Release && \
-    cmake --build /opt/radloc/core-build -j8 && pip3 install --no-cache-dir --no-deps /radloc
+    cmake --build /opt/radloc/core-build -j8 && \
+    python3 -m pip install --no-cache-dir -U "pip>=23" && python3 -m pip install --no-cache-dir --no-deps /radloc
 # ROS 1 package (odometry + SLAM). RADLOC_ROOT is passed because the workspace links the package in.
 RUN mkdir -p /ws/src && ln -s /radloc/applications/slam/ros1/radloc_ros /ws/src/radloc_ros && \
     source /opt/ros/noetic/setup.bash && cd /ws && \

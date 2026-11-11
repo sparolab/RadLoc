@@ -164,7 +164,7 @@ class PoseGraphNode : public rclcpp::Node {
       if (keyframe_gap_m_ > 0.0 && travelled < keyframe_gap_m_) continue;
       travelled = 0.0;
 
-      auto keyframe_cloud = std::make_shared<Cloud>();
+      Cloud::Ptr keyframe_cloud(new Cloud);  // boost::shared_ptr on PCL 1.10 (Noetic), std on 1.12
       pcl::fromROSMsg(cloud, *keyframe_cloud);
 
       radloc::Descriptor bands;

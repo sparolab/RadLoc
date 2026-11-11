@@ -7,7 +7,7 @@ name = "radloc"
 dynamic = ["version"]
 description = "RadLoc: radar global descriptor, place recognition and 3-DoF registration (IROS 2026)"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 license = { text = "BSD-3-Clause" }
 authors = [{ name = "Hogyun Kim", email = "hg.kim@inha.edu" }]
 keywords = ["radar", "fmcw radar", "place recognition", "global localization", "loop closure", "slam",

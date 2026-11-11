@@ -22,6 +22,16 @@ keyframe every `keyframe_gap_m` (0: every scan), proposes a loop for each new ke
 `loop_min_travel_m` (10 m) back along the path, registers it by phase correlation (`loop_min_response` 0.3) and
 optimizes with iSAM2. Parameters and topics are the same on both ROS versions.
 
+**Input layout.** The odometry reads the Oxford layout: one row per azimuth, 11 metadata bytes (timestamp,
+encoder count, valid flag) and then the range bins. MulRan's downloaded `polar/` scans are range x azimuth
+without that header; convert them once:
+
+```bash
+python3 applications/slam/tools/mulran_to_oxford.py <MulRan>/KAIST_03/polar <data>/Mulran/KAIST_03/polar
+```
+
+(The descriptor itself takes either layout: `radloc describe` and `radloc::computeDescriptor` normalise it.)
+
 The session written to `save_directory` (`singlesession_posegraph.g2o`, `odom_poses_kitti.txt`,
 `optimized_poses_kitti.txt`, `keyframe_times.txt`, `RadLocDescriptors/`, `Scans/`) is what
 [multi-session SLAM](../multi-session-slam) reads.

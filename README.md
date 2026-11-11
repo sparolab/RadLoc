@@ -117,7 +117,7 @@ ros2 launch radloc_slam radloc_slam.launch.py sequence_dir:=<MulRan>/KAIST_03 sa
 roslaunch radloc_ros radloc_slam.launch sequence_dir:=<MulRan>/KAIST_03 save_directory:=/data/output/KAIST_03/
 ```
 
-Both read `polar/` from the sequence folder; the session goes to `save_directory` (`optimized_poses_kitti.txt`, `odom_poses_kitti.txt`, `keyframe_times.txt`, `singlesession_posegraph.g2o`, `RadLocDescriptors/`, `Scans/`). See [applications/slam](applications/slam).
+Both read `polar/` from the sequence folder in the Oxford layout (MulRan scans: convert once with [`applications/slam/tools/mulran_to_oxford.py`](applications/slam/tools/mulran_to_oxford.py)); the session goes to `save_directory` (`optimized_poses_kitti.txt`, `odom_poses_kitti.txt`, `keyframe_times.txt`, `singlesession_posegraph.g2o`, `RadLocDescriptors/`, `Scans/`). See [applications/slam](applications/slam).
 
 ## :link: Multi-session SLAM
 
